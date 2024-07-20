@@ -104,3 +104,19 @@ def change_color(header, light_id, bridge_ip, x, y):
                }, verify=False)
     check_response(r)
     return {"message": "OK"}
+
+
+def get_lights(header, bridge_ip):
+    url = f"https://{bridge_ip}/clip/v2/resource/device"
+    r = rq.get(url=url, headers=header, verify=False)
+    lights = []
+    response_data = r.json()
+    for device in response_data["data"]:
+        for service in device.get("services", []):
+            if service.get("rtype") == "light":
+                light_info = {
+                    "name": device["metadata"]["name"],
+                    "rid": service["rid"],
+                }
+                lights.append(light_info)
+    return lights
