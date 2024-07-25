@@ -1,12 +1,8 @@
-import json
 import os
-import time
-from fastapi import FastAPI, BackgroundTasks, Header
+from fastapi import FastAPI, BackgroundTasks, Header, Security, HTTPException, status
+from fastapi.security import APIKeyHeader
 import hue_light_utils
-from typing import Annotated
 from dotenv import load_dotenv
-
-app = FastAPI()
 
 
 def get_hue_bridge_ip():
@@ -18,17 +14,28 @@ def get_hue_bridge_ip():
         return None
 
 
-def get_hue_api_key():
-    load_dotenv()
-    return os.getenv("hue-application-key")
+app = FastAPI()
+load_dotenv()
 
 
 hue_bridge_ip_address = get_hue_bridge_ip()
-hue_api_key = get_hue_api_key()
+hue_api_key = os.getenv("hue-application-key")
+server_api_key = os.getenv("server-api-key")
+
+api_key_header = APIKeyHeader(name="api-key")
+
+
+def get_api_key(api_key: str = Security(api_key_header)) -> str:
+    if api_key == server_api_key:
+        return api_key
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or missing server API Key",
+    )
 
 
 @app.get("/change-power/{light_id}")
-async def change_power(light_id: str):
+async def change_power(light_id: str, api_key: str = Security(get_api_key)):
     _header = {"hue-application-key": hue_api_key}
     if hue_bridge_ip_address:
         hue_light_utils.change_power(header=_header, light_id=light_id, bridge_ip=hue_bridge_ip_address)
@@ -38,9 +45,9 @@ async def change_power(light_id: str):
 
 
 @app.get("/turn-on/{light_id}")
-async def turn_on(light_id: str):
+async def turn_on(light_id: str, api_key: str = Security(get_api_key)):
     _header = {"hue-application-key": hue_api_key}
-    response =  hue_light_utils.turn_on(header=_header, light_id=light_id, bridge_ip=hue_bridge_ip_address)
+    response = hue_light_utils.turn_on(header=_header, light_id=light_id, bridge_ip=hue_bridge_ip_address)
     if response.get("message") == "OK":
         return {"message": "Turned on!"}
     elif response.get("message") == "Already turned on!":
@@ -50,9 +57,9 @@ async def turn_on(light_id: str):
 
 
 @app.get("/turn-off/{light_id}")
-async def turn_off(light_id: str):
+async def turn_off(light_id: str, api_key: str = Security(get_api_key)):
     _header = {"hue-application-key": hue_api_key}
-    response =  hue_light_utils.turn_off(header=_header, light_id=light_id, bridge_ip=hue_bridge_ip_address)
+    response = hue_light_utils.turn_off(header=_header, light_id=light_id, bridge_ip=hue_bridge_ip_address)
     if response.get("message") == "OK":
         return {"message": "Turned off!"}
     elif response.get("message") == "Already turned off!":
@@ -62,7 +69,7 @@ async def turn_off(light_id: str):
 
 
 @app.get("/change-brightness/{light_id}")
-async def change_brightness(light_id: str, level: int | None = None):
+async def change_brightness(light_id: str, level: int | None = None, api_key: str = Security(get_api_key)):
     if level is None:
         return {"message": "Brightness level not specified!"}
     else:
@@ -77,7 +84,7 @@ async def change_brightness(light_id: str, level: int | None = None):
 
 
 @app.get("/get-lights")
-async def get_lights():
+async def get_lights(api_key: str = Security(get_api_key)):
     _header = {"hue-application-key": hue_api_key}
     lights = hue_light_utils.get_lights(header=_header, bridge_ip=hue_bridge_ip_address)
     return lights
