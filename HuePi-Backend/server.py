@@ -1,8 +1,13 @@
 import os
-from fastapi import FastAPI, BackgroundTasks, Header, Security, HTTPException, status
+import time
+
+from fastapi import FastAPI, BackgroundTasks, Header, Security, HTTPException, status, BackgroundTasks
 from fastapi.security import APIKeyHeader
 import hue_light_utils
 from dotenv import load_dotenv
+from color_conversions import hsv2xy, hsv2rgb, rgb2xy
+from bme280_utils import read_temperature
+from light_functions import translate_temperature_to_hsv_color
 
 
 def get_hue_bridge_ip():
@@ -16,7 +21,6 @@ def get_hue_bridge_ip():
 
 app = FastAPI()
 load_dotenv()
-
 
 hue_bridge_ip_address = get_hue_bridge_ip()
 hue_api_key = os.getenv("hue-application-key")
@@ -78,9 +82,56 @@ async def change_brightness(light_id: str, level: int | None = None, api_key: st
         elif level > 100:
             level = 100
         _header = {"hue-application-key": hue_api_key}
-        response =  hue_light_utils.change_brightness(header=_header, light_id=light_id, level=level, bridge_ip=hue_bridge_ip_address)
+        response = hue_light_utils.change_brightness(header=_header, light_id=light_id,
+                                                     level=level, bridge_ip=hue_bridge_ip_address)
         if response.get("message") == "OK":
             return {"message": f"Brightness changed to: {level}"}
+
+
+@app.get("/change-color/{light_id}")
+async def change_color(light_id: str,
+                       h: float | None = None, s: float | None = None, v: float | None = None,
+                       api_key: str = Security(get_api_key)):
+    _header = {"hue-application-key": hue_api_key}
+    if (h and s and v) is not None:
+        x, y = hsv2xy(h, s, v)
+        response = hue_light_utils.change_color(header=_header, light_id=light_id, x=x, y=y,
+                                                bridge_ip=hue_bridge_ip_address)
+        if response.get("message") == "OK":
+            return {"message": f"Color changed to: x:{x}, y:{y}"}
+    else:
+        return {"message": "Missing some parameters"}
+
+
+tasks = {}
+
+
+@app.get("/temp-to-color/{light_id}")
+async def temp_to_color(background_tasks: BackgroundTasks, light_id: str,
+                        h_min: float, h_max: float, temp_min: float, temp_max: float,
+                        api_key: str = Security(get_api_key)):
+    _header = {"hue-application-key": hue_api_key}
+    if light_id in tasks:
+        tasks[light_id] = False
+        del tasks[light_id]
+        return {"message": f"Stopped displaying temp_to_light for light id: {light_id}"}
+    else:
+        tasks[light_id] = True
+        background_tasks.add_task(display_temperature_to_color,
+                                  temp_min=temp_min, temp_max=temp_max,
+                                  hsv_color_min=h_min, hsv_color_max=h_max, header=_header, light_id=light_id)
+        return {"message": f"Displaying temp_to_light for light id: {light_id}"}
+
+
+def display_temperature_to_color(temp_min, temp_max, hsv_color_min, hsv_color_max, header, light_id):
+    while tasks.get(light_id, False):
+        current_temp = read_temperature()
+        converted_hue_value = translate_temperature_to_hsv_color(
+            input_temp=current_temp, temp_min=temp_min, temp_max=temp_max,
+            hsv_color_min=hsv_color_min, hsv_color_max=hsv_color_max)
+        x, y = hsv2xy(converted_hue_value, 1, 1)
+        hue_light_utils.change_color(header=header, light_id=light_id, bridge_ip=hue_bridge_ip_address, x=x, y=y)
+        time.sleep(1)
 
 
 @app.get("/get-lights")
@@ -90,37 +141,6 @@ async def get_lights(api_key: str = Security(get_api_key)):
     return lights
 
 
-# keep_going = False
-
-
-# def infinite_loop_task():
-#     global keep_going
-#     num = 1
-#     while keep_going:
-#         print(f"Infinite loop nr: {num}")
-#         time.sleep(1)
-#         num += 1
-
-
-# @app.get("/header-test")
-# def lol(my_header: Annotated[str | None, Header()] = None):
-#     print(f"This is value of \"my-header\": {my_header}")
-#     return {"my-header" : my_header}
-
-
-# @app.get("/loop")
-# async def infinite_loop(background_tasks: BackgroundTasks):
-#     global keep_going
-#     if keep_going:
-#         return {"message": "Loop already running"}
-#     else:
-#         keep_going = True
-#         background_tasks.add_task(infinite_loop_task)
-#         return {"message": "Infinite loop started"}
-
-
-# @app.get("/terminate-loop")
-# def terminate_loop():
-#     global keep_going
-#     keep_going = False
-#     return {"message": "Infinite loop terminated"}
+@app.get("/check-connection")
+async def check(api_key: str = Security(get_api_key)):
+    return {"message": "OK"}
