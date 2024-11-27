@@ -71,7 +71,6 @@ fun SetupAndConnectContent(
             scope.launch {
                 onConnectClicked()
             }
-//            onConnectClicked()
             connectClicked = false
         }
     }

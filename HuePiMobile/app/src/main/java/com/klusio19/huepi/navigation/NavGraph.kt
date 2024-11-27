@@ -3,6 +3,7 @@ package com.klusio19.huepi.navigation
 import android.app.Application
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -11,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.klusio19.huepi.presentation.screens.home.HomeScreen
+import com.klusio19.huepi.presentation.screens.home.HomeViewModel
 import com.klusio19.huepi.presentation.screens.loading.LoadingScreen
 import com.klusio19.huepi.presentation.screens.loading.LoadingViewModel
 import com.klusio19.huepi.presentation.screens.setup_and_connect.SetupAndConnectScreen
@@ -36,9 +38,11 @@ fun SetupNavGraph(startDestination: String, navController: NavHostController, co
 
 fun NavGraphBuilder.loadingRoute(
     context: Application,
-    navController: NavHostController
+    navController: NavHostController,
 ) {
-    composable(route = Screen.Loading.route) {
+    composable(
+        route = Screen.Loading.route,
+    ) {
         val viewModel = LoadingViewModel(context)
 
         LaunchedEffect(key1 = true) {
@@ -59,7 +63,9 @@ fun NavGraphBuilder.loadingRoute(
 
 
 fun NavGraphBuilder.setupAndConnectRoute(navController: NavHostController) {
-    composable(route = Screen.SetupAndConnect.route) {
+    composable(
+        route = Screen.SetupAndConnect.route,
+    ) {
         val viewModel: SetupAndConnectViewModel = viewModel()
 
         LaunchedEffect(Unit) {
@@ -92,8 +98,19 @@ fun NavGraphBuilder.setupAndConnectRoute(navController: NavHostController) {
 }
 
 fun NavGraphBuilder.homeRoute() {
-    composable(route = Screen.Home.route) {
-        HomeScreen()
+    composable(
+        route = Screen.Home.route,
+    ) {
+        val viewModel: HomeViewModel = viewModel()
+        HomeScreen(
+            lightBulbsList = viewModel.lightBulbsList.collectAsState().value,
+            isRefreshing = viewModel.isRefreshing.collectAsState().value,
+            onRefresh = { viewModel.fetchLightBulbs() },
+            onLightBulbClicked = { lightId ->
+                // Handle light bulb click
+            }
+        )
+
     }
 }
 

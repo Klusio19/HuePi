@@ -2,8 +2,6 @@ package com.klusio19.huepi.presentation.screens.setup_and_connect
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -22,23 +20,17 @@ fun SetupAndConnectScreen(
     apiKeyText: String,
     connectionState: SetupAndConnectViewModel.ConnectionState
     ) {
-    Scaffold(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surface)
-            .statusBarsPadding()
-            .navigationBarsPadding(),
-        content = {
-            SetupAndConnectContent(
-                onIpChange = onIpChange,
-                onApiKeyChange = onApiKeyChange,
-                onValidateInputs = onValidateInputs,
-                onConnectClicked = onConnectClicked,
-                isIpAddressValid = isIpAddressValid,
-                isApiKeyValid = isApiKeyValid,
-                ipText = ipText,
-                apiKeyText = apiKeyText,
-                connectionState = connectionState
-            )
-        }
-    )
+    Scaffold(modifier = Modifier.background(MaterialTheme.colorScheme.background)){
+        SetupAndConnectContent(
+            onIpChange = onIpChange,
+            onApiKeyChange = onApiKeyChange,
+            onValidateInputs = onValidateInputs,
+            onConnectClicked = onConnectClicked,
+            isIpAddressValid = isIpAddressValid,
+            isApiKeyValid = isApiKeyValid,
+            ipText = ipText,
+            apiKeyText = apiKeyText,
+            connectionState = connectionState
+        )
+    }
 }
