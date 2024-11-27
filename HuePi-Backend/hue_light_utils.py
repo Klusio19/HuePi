@@ -1,6 +1,7 @@
 import requests as rq
 import json
 import urllib3
+from color_conversions import xy2hex
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
@@ -21,7 +22,7 @@ def powered_on(header, light_id, bridge_ip):
         return False
 
 
-def change_power(header, light_id, bridge_ip):
+def switch_power(header, light_id, bridge_ip):
     light_url = f"https://{bridge_ip}/clip/v2/resource/light/{light_id}"
     payload_on = json.dumps({
         "on": {
@@ -106,17 +107,76 @@ def change_color(header, light_id, bridge_ip, x, y):
     return {"message": "OK"}
 
 
-def get_lights(header, bridge_ip):
-    url = f"https://{bridge_ip}/clip/v2/resource/device"
-    r = rq.get(url=url, headers=header, verify=False)
+def get_full_lights(header, bridge_ip):
+    base_url = f"https://{bridge_ip}/clip/v2/resource"
+    devices_url = f"{base_url}/device"
+    
+    # First GET request to retrieve all light devices which returns only "rid" and "name" 
+    response = rq.get(url=devices_url, headers=header, verify=False)
     lights = []
-    response_data = r.json()
-    for device in response_data["data"]:
+    
+    check_response(response)
+    
+    response_data = response.json()
+    for device in response_data.get("data", []):
         for service in device.get("services", []):
             if service.get("rtype") == "light":
+                light_rid = service["rid"]
+                
+                # Second GET request for detailed light information
+                light_url = f"{base_url}/light/{light_rid}"
+                light_response = rq.get(url=light_url, headers=header, verify=False)
+                
+                if (light_response.status_code != 200 and light_response.status_code != 207):
+                    print("Error fetching light details:", light_response.status_code, light_response.text)
+                    brightness = None
+                    is_on: bool = None
+                    color_hex = None
+
+                light_data = light_response.json().get("data", [])[0]
+                brightness = light_data.get("dimming", {}).get("brightness")
+                is_on = light_data.get("on", {}).get("on")
+                xy_color = light_data.get("color", {}).get("xy")
+                color_hex = xy2hex(xy_color["x"], xy_color["y"]) if xy_color else None
+                name = device["metadata"]["name"]
+
                 light_info = {
-                    "name": device["metadata"]["name"],
-                    "rid": service["rid"],
+                    "rid": light_rid,
+                    "name": name,
+                    "brightness": brightness,
+                    "isOn": is_on,
+                    "color": f"#{color_hex}",
                 }
                 lights.append(light_info)
     return lights
+
+
+def get_light_details(header, bridge_ip, light_id):
+    light_url = f"https://{bridge_ip}/clip/v2/resource/light/{light_id}"
+    response = rq.get(url=light_url, headers=header, verify=False)
+    
+    print(response.status_code)
+    if (response.status_code != 200 and response.status_code != 207):
+        print("Error fetching light details:", response.status_code, response.text)
+        return None
+
+    light_data = response.json().get("data", [])[0]  # Get the first light data object
+    
+    brightness = light_data.get("dimming", {}).get("brightness")
+    name = light_data.get("metadata", {}).get("name")
+    is_on = light_data.get("on", {}).get("on")
+    xy_color = light_data.get("color", {}).get("xy")
+    color_hex = xy2hex(xy_color["x"], xy_color["y"]) if xy_color else None
+
+
+    light_info = {
+        "rid": light_id,
+        "name": name,
+        "brightness": brightness,
+        "isOn": is_on,
+        "color": f"#{color_hex}",
+    }
+
+    return light_info
+
+
