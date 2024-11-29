@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
             HuePiTheme {
                 val navController = rememberNavController()
                     SetupNavGraph(
-                        startDestination = Screen.Loading.route,
+                        startDestination = Screen.Loading,
                         navController = navController,
                         context = application
                     )

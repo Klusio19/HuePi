@@ -39,7 +39,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 val lightBulbs = raspberryPiAPIService.getAllLightsDetails().body()
                 _lightBulbsList.value = lightBulbs
             } catch (e: Exception) {
-                _lightBulbsList.value = null // Handle errors gracefully
+                _lightBulbsList.value = null
             } finally {
                 _isRefreshing.value = false
             }

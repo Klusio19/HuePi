@@ -7,12 +7,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.klusio19.huepi.presentation.screens.home.HomeScreen
 import com.klusio19.huepi.presentation.screens.home.HomeViewModel
+import com.klusio19.huepi.presentation.screens.light_details.LightDetailsScreen
+import com.klusio19.huepi.presentation.screens.light_details.LightDetailsViewModel
 import com.klusio19.huepi.presentation.screens.loading.LoadingScreen
 import com.klusio19.huepi.presentation.screens.loading.LoadingViewModel
 import com.klusio19.huepi.presentation.screens.setup_and_connect.SetupAndConnectScreen
@@ -21,73 +22,47 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun SetupNavGraph(startDestination: String, navController: NavHostController, context: Application) {
-    NavHost(
-        startDestination = startDestination,
-        navController = navController
-    ) {
-        loadingRoute(
-            context = context,
-            navController = navController
-        )
+fun SetupNavGraph(startDestination: Screen, navController: NavHostController, context: Application) {
+    NavHost(navController = navController, startDestination = startDestination) {
+        loadingRoute(context, navController)
         setupAndConnectRoute(navController)
-        homeRoute()
-        lightRoute()
+        homeRoute(navController)
+        lightRoute(context, navController)
     }
 }
 
-fun NavGraphBuilder.loadingRoute(
-    context: Application,
-    navController: NavHostController,
-) {
-    composable(
-        route = Screen.Loading.route,
-    ) {
+fun NavGraphBuilder.loadingRoute(context: Application, navController: NavHostController) {
+    composable<Screen.Loading> {
         val viewModel = LoadingViewModel(context)
 
-        LaunchedEffect(key1 = true) {
+        LaunchedEffect(Unit) {
             viewModel.navigationRoute.collectLatest { route ->
                 route?.let {
-                    navController.navigate(route) {
-                        popUpTo(Screen.Loading.route) {
-                            inclusive = true
-                        }
-                    }
+                    navController.popBackStack()
+                    navController.navigate(it)
                 }
             }
         }
-
         LoadingScreen()
     }
 }
 
-
 fun NavGraphBuilder.setupAndConnectRoute(navController: NavHostController) {
-    composable(
-        route = Screen.SetupAndConnect.route,
-    ) {
+    composable<Screen.SetupAndConnect> {
         val viewModel: SetupAndConnectViewModel = viewModel()
-
         LaunchedEffect(Unit) {
             viewModel.navigationEvent.collect { shouldNavigate ->
                 if (shouldNavigate) {
                     delay(1000L)
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.SetupAndConnect.route) {
-                            inclusive = true
-                        }
-                    }
+                    navController.navigate(Screen.Home)
                 }
             }
         }
-
         SetupAndConnectScreen(
-            onIpChange = { ip -> viewModel.updateIpNumbersTextValue(ip) },
-            onApiKeyChange = { apiKey -> viewModel.updateApiKeyTextValue(apiKey) },
+            onIpChange = { viewModel.updateIpNumbersTextValue(it) },
+            onApiKeyChange = { viewModel.updateApiKeyTextValue(it) },
             onValidateInputs = { viewModel.validateInputs() },
-            onConnectClicked = {
-                viewModel.raspiConnectionEstablished()
-            },
+            onConnectClicked = { viewModel.raspiConnectionEstablished() },
             isIpAddressValid = viewModel.isIpAddressValid,
             isApiKeyValid = viewModel.isApiKeyValid,
             ipText = viewModel.ipNumbersTextValue,
@@ -97,31 +72,22 @@ fun NavGraphBuilder.setupAndConnectRoute(navController: NavHostController) {
     }
 }
 
-fun NavGraphBuilder.homeRoute() {
-    composable(
-        route = Screen.Home.route,
-    ) {
+fun NavGraphBuilder.homeRoute(navController: NavHostController) {
+    composable<Screen.Home> {
         val viewModel: HomeViewModel = viewModel()
         HomeScreen(
             lightBulbsList = viewModel.lightBulbsList.collectAsState().value,
             isRefreshing = viewModel.isRefreshing.collectAsState().value,
             onRefresh = { viewModel.fetchLightBulbs() },
-            onLightBulbClicked = { lightId ->
-                // Handle light bulb click
-            }
+            onLightBulbClicked = { lightId -> navController.navigate(Screen.LightDetails(lightId)) }
         )
-
     }
 }
 
-fun NavGraphBuilder.lightRoute() {
-    composable(
-        route = Screen.Light.route,
-        arguments = listOf(navArgument(name = "lightId") {
-            type = NavType.StringType
-            nullable = false
-        })
-    ) {
-
+fun NavGraphBuilder.lightRoute(context: Application, navController: NavHostController) {
+    composable<Screen.LightDetails> { backStackEntry ->
+        val args = backStackEntry.toRoute<Screen.LightDetails>()
+        val viewModel = LightDetailsViewModel(context, args.rid)
+        LightDetailsScreen(args.rid)
     }
 }

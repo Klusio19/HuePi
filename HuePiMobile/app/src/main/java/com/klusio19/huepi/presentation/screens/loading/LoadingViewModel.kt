@@ -18,8 +18,8 @@ import retrofit2.HttpException
 class LoadingViewModel(context: Application): ViewModel() {
 
     private val dataStoreManager = DataStoreManager(context)
-    private val _navigationRoute = MutableStateFlow<String?>(null)
-    val navigationRoute: StateFlow<String?> = _navigationRoute
+    private val _navigationRoute = MutableStateFlow<Screen?>(null)
+    val navigationRoute: StateFlow<Screen?> = _navigationRoute
 
     init {
         checkConnectionAndNavigate()
@@ -38,38 +38,17 @@ class LoadingViewModel(context: Application): ViewModel() {
                 val connectionEstablished = raspberryPiConnectionEstablished(raspiUrl, raspiApiKey)
 
                 _navigationRoute.value = if (connectionEstablished) {
-                    Screen.Home.route
+                    Screen.Home
                 } else {
-                    Screen.SetupAndConnect.route
+                    Screen.SetupAndConnect
                 }
             } catch (e: Exception) {
                 Log.e("LoadingViewModel", "Error during connection check", e)
-                _navigationRoute.value = Screen.SetupAndConnect.route
+                _navigationRoute.value = Screen.SetupAndConnect
             }
         }
     }
 
-//    private suspend fun raspberryPiConnectionEstablished(url: String, apiKey: String) : Boolean {
-//        Log.d("LOADING-VIEWMODEL", "url: $url")
-//        Log.d("LOADING-VIEWMODEL", "apiKey: $apiKey")
-//        var response: Response<ConnectionCheck>? = null
-//        try {
-//            val raspberryPiAPIService = RetrofitInstance.getClient(url, apiKey)
-//            response = withContext(Dispatchers.IO) {
-//                raspberryPiAPIService.checkConnection()
-//            }
-//            if (response.isSuccessful && response.body()?.message == "OK") {
-//                return true
-//            }
-//        } catch (e: IOException) {
-//            Log.d("RaspiConnection", "IO EXCEPTION: ${e.message}")
-//            return false
-//        } catch (e: HttpException) {
-//            Log.d("RaspiConnection", "HTTP EXCEPTION: ${e.message}")
-//            return false
-//        }
-//        return false
-//    }
     private suspend fun raspberryPiConnectionEstablished(url: String, apiKey: String): Boolean {
         return try {
             val raspberryPiAPIService = RetrofitInstance.getClient(url, apiKey)

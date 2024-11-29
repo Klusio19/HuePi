@@ -1,8 +1,18 @@
 package com.klusio19.huepi.navigation
 
-sealed class Screen(val route: String) {
-    object Loading: Screen(route = "loading_screen")
-    object SetupAndConnect: Screen(route = "setup_and_connect_screen")
-    object Home: Screen(route = "home_screen")
-    object Light: Screen(route = "light_screen/{lightId}")
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed class Screen {
+    @Serializable
+    data object Loading : Screen()
+
+    @Serializable
+    data object SetupAndConnect : Screen()
+
+    @Serializable
+    data object Home : Screen()
+
+    @Serializable
+    data class LightDetails(val rid: String) : Screen()
 }
