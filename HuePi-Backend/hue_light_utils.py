@@ -76,15 +76,17 @@ def turn_off(header, light_id, bridge_ip):
 
 
 def change_brightness(header, light_id, level, bridge_ip):
-    if level > 100:
-        level = 100
-    elif level < 0:
-        level = 0
+    level_int = (round(level, 2) * 100)
+
+    if level_int > 100:
+        level_int = 100
+    elif level_int < 0:
+        level_int = 0
 
     light_url = f"https://{bridge_ip}/clip/v2/resource/light/{light_id}"
     payload = json.dumps({
         "dimming": {
-            "brightness": level
+            "brightness": level_int
         }
     })
     r = rq.put(url=light_url, headers=header, data=payload, verify=False)

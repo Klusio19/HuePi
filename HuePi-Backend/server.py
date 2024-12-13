@@ -96,14 +96,14 @@ async def turn_off(light_id: str, api_key: str = Security(get_api_key)):
 
 
 @app.get("/change-brightness/{light_id}")
-async def change_brightness(light_id: str, level: int | None = None, api_key: str = Security(get_api_key)):
+async def change_brightness(light_id: str, level: float | None = None, api_key: str = Security(get_api_key)):
     if level is None:
         return {"message": "Brightness level not specified!"}
     else:
-        if level < 0:
-            level = 0
-        elif level > 100:
-            level = 100
+        if level < 0.0:
+            level = 0.0
+        elif level > 1.0:
+            level = 1.0
         _header = {"hue-application-key": hue_api_key}
         response = hue_light_utils.change_brightness(header=_header, light_id=light_id,
                                                      level=level, bridge_ip=hue_bridge_ip_address)
