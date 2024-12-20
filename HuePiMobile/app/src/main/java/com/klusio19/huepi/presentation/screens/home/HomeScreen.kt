@@ -37,11 +37,8 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 when {
-                    isRefreshing -> {
-                        Box(modifier = Modifier
-                                .fillMaxSize()
-                                .align(Alignment.Center))
-                    }
+                    isRefreshing -> {}
+
                     lightBulbsList.isNullOrEmpty() -> {
                         Box(
                             contentAlignment = Alignment.Center,

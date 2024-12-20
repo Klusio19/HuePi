@@ -14,6 +14,7 @@ import com.klusio19.huepi.presentation.screens.home.HomeScreen
 import com.klusio19.huepi.presentation.screens.home.HomeViewModel
 import com.klusio19.huepi.presentation.screens.light_details.LightDetailsScreen
 import com.klusio19.huepi.presentation.screens.light_details.LightDetailsViewModel
+import com.klusio19.huepi.presentation.screens.light_details.LightDetailsViewModelFactory
 import com.klusio19.huepi.presentation.screens.loading.LoadingScreen
 import com.klusio19.huepi.presentation.screens.loading.LoadingViewModel
 import com.klusio19.huepi.presentation.screens.setup_and_connect.SetupAndConnectScreen
@@ -87,7 +88,17 @@ fun NavGraphBuilder.homeRoute(navController: NavHostController) {
 fun NavGraphBuilder.lightRoute(context: Application, navController: NavHostController) {
     composable<Screen.LightDetails> { backStackEntry ->
         val args = backStackEntry.toRoute<Screen.LightDetails>()
-        val viewModel = LightDetailsViewModel(context, args.rid)
-        LightDetailsScreen(args.rid)
+        val viewModelFactory = LightDetailsViewModelFactory(context, args.rid)
+        val viewModel: LightDetailsViewModel = viewModel(factory = viewModelFactory)
+        LightDetailsScreen(
+            lightBulb = viewModel.lightBulb.collectAsState().value,
+            isFetchingData = viewModel.isFetchingData.collectAsState().value,
+            onRefresh = { viewModel.fetchLightBulb() },
+            onTurnOn = { viewModel.turnOnLightBulb() },
+            onTurnOff = { viewModel.turnOffLightBulb() },
+            onBrightnessSet = {level ->
+                viewModel.changeBrightness(level)
+            }
+        )
     }
 }
