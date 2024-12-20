@@ -249,3 +249,5 @@ cython_debug/
 
 # My custom project-wise
 hue-bridge-ip.txt
+self-signed.crt
+self-signed.key
