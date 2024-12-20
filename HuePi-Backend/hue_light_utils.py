@@ -164,7 +164,8 @@ def get_light_details(header, bridge_ip, light_id):
 
     light_data = response.json().get("data", [])[0]  # Get the first light data object
     
-    brightness = light_data.get("dimming", {}).get("brightness")
+    brightness_float_100_range = light_data.get("dimming", {}).get("brightness")
+    brightness_float_1_range = round((brightness_float_100_range/100), 2)
     name = light_data.get("metadata", {}).get("name")
     is_on = light_data.get("on", {}).get("on")
     xy_color = light_data.get("color", {}).get("xy")
@@ -174,7 +175,7 @@ def get_light_details(header, bridge_ip, light_id):
     light_info = {
         "rid": light_id,
         "name": name,
-        "brightness": brightness,
+        "brightness": brightness_float_1_range,
         "isOn": is_on,
         "color": f"#{color_hex}",
     }
