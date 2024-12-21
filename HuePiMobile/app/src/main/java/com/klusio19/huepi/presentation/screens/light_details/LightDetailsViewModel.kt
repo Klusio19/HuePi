@@ -70,7 +70,13 @@ class LightDetailsViewModel(
 
     fun changeBrightness(level: Float) {
         viewModelScope.launch {
-            val response = raspberryPiAPIService.changeBrightness(rid, level)
+            val response = raspberryPiAPIService.setBrightness(rid, level)
+        }
+    }
+
+    fun setColor(h: Float, s: Float, v: Float) {
+        viewModelScope.launch {
+            val response = raspberryPiAPIService.setColor(rid, h, s, v)
         }
     }
 }

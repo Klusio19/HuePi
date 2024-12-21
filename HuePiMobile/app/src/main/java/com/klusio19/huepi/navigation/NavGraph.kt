@@ -96,8 +96,11 @@ fun NavGraphBuilder.lightRoute(context: Application, navController: NavHostContr
             onRefresh = { viewModel.fetchLightBulb() },
             onTurnOn = { viewModel.turnOnLightBulb() },
             onTurnOff = { viewModel.turnOffLightBulb() },
-            onBrightnessSet = {level ->
+            onBrightnessSet = { level ->
                 viewModel.changeBrightness(level)
+            },
+            onColorChosen = { h, s, v ->
+                viewModel.setColor(h, s, v)
             }
         )
     }

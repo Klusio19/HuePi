@@ -31,9 +31,16 @@ interface RaspberryPiAPIService {
     ): Response<LightBulbStateChangeResponse?>
 
     @GET("/change-brightness/{rid}")
-    suspend fun changeBrightness(
+    suspend fun setBrightness(
         @Path("rid") rid: String,
         @Query("level") level: Float
     ): Response<LightBulbStateChangeResponse?>
 
+    @GET("/change-color/{rid}")
+    suspend fun setColor(
+        @Path("rid") rid: String,
+        @Query("h") h: Float,
+        @Query("s") s: Float,
+        @Query("v") v: Float,
+    ): Response<LightBulbStateChangeResponse?>
 }

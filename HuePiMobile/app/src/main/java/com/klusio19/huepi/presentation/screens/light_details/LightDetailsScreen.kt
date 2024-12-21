@@ -19,10 +19,8 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.klusio19.huepi.model.LightBulb
-import com.klusio19.huepi.ui.theme.HuePiTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +30,8 @@ fun LightDetailsScreen(
     onRefresh: () -> Unit,
     onTurnOn: () -> Unit,
     onTurnOff: () -> Unit,
-    onBrightnessSet: (Float) -> Unit
+    onBrightnessSet: (Float) -> Unit,
+    onColorChosen: (Float, Float, Float) -> Unit
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
     Box(
@@ -63,7 +62,11 @@ fun LightDetailsScreen(
                         Scaffold(
                             topBar = {
                                 TopAppBar(
-                                    title = { Text(text = lightBulb.name) },
+                                    title = {
+                                        Text(
+                                            text = lightBulb.name
+                                        )
+                                    },
                                     actions = {
                                         Icon(
                                             Icons.Rounded.Refresh,
@@ -85,8 +88,11 @@ fun LightDetailsScreen(
                                     modifier = Modifier.padding(paddingValues),
                                     onTurnOnSwitched = onTurnOn,
                                     onTurnOffSwitched = onTurnOff,
-                                    onBrightnessSet = {level ->
+                                    onBrightnessSet = { level ->
                                         onBrightnessSet(level)
+                                    },
+                                    onColorChosen = { h,s,v ->
+                                        onColorChosen(h, s, v)
                                     }
                                 )
                             }
@@ -98,24 +104,24 @@ fun LightDetailsScreen(
     )
 }
 
-@Preview(showSystemUi = true)
-@Composable
-private fun LightDetailsScreenPreview() {
-    HuePiTheme(darkTheme = true) {
-        LightDetailsScreen(
-            lightBulb = LightBulb(
-                rid = "2137xd",
-                brightness = 21.37F,
-                color = "#213F",
-                isOn = true,
-                name = "Taktyczna nazwa żarówki",
-                taskRunning = false
-            ),
-            isFetchingData = false,
-            onRefresh = {},
-            onTurnOn = {},
-            onTurnOff = {},
-            onBrightnessSet = {}
-        )
-    }
-}
+//@Preview(showSystemUi = true)
+//@Composable
+//private fun LightDetailsScreenPreview() {
+//    HuePiTheme(darkTheme = true) {
+//        LightDetailsScreen(
+//            lightBulb = LightBulb(
+//                rid = "2137xd",
+//                brightness = 21.37F,
+//                color = "#213F",
+//                isOn = true,
+//                name = "Taktyczna nazwa żarówki",
+//                taskRunning = false
+//            ),
+//            isFetchingData = false,
+//            onRefresh = {},
+//            onTurnOn = {},
+//            onTurnOff = {},
+//            onBrightnessSet = {}
+//        )
+//    }
+//}
