@@ -3,15 +3,13 @@ package com.klusio19.huepi.presentation.screens.light_details
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -26,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.core.graphics.toColorInt
 import com.github.skydoves.colorpicker.compose.AlphaTile
 import com.github.skydoves.colorpicker.compose.ColorPickerController
@@ -44,18 +41,8 @@ fun LightDetailsContent(
     onColorChosen: (Float, Float, Float) -> Unit
 ) {
     var isOnState by remember { mutableStateOf(lightBulb.isOn) }
-    var colorPickerDialogOpened by remember { mutableStateOf(false) }
-    val controller = rememberColorPickerController()
-
-
-    if (colorPickerDialogOpened) {
-        ColorPickerDialog(
-            onDialogDismissed = { colorPickerDialogOpened = false },
-            colorController = controller,
-            onColorChosen = onColorChosen,
-            initialColor = Color(lightBulb.color.toColorInt())
-        )
-    }
+    val colorController = rememberColorPickerController()
+    var initialColor = Color(lightBulb.color.toColorInt())
 
     Column(
         modifier = modifier
@@ -78,11 +65,11 @@ fun LightDetailsContent(
             onBrightnessSet = onBrightnessSet
         )
 
-        Button(
-            onClick = {colorPickerDialogOpened = true}
-        ) {
-            Text("Color")
-        }
+        ColorPickerWithTileAndButton(
+            colorController = colorController,
+            initialColor = initialColor,
+            onColorChosen = onColorChosen
+        )
     }
 }
 
@@ -95,9 +82,7 @@ fun PowerStateRow(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 10.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text("Power state")
         Switch(
@@ -128,107 +113,62 @@ fun BrightnessSliderWithText(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ColorPickerDialog(
+fun ColorPickerWithTileAndButton(
     colorController: ColorPickerController,
-    onDialogDismissed: () -> Unit,
-    onColorChosen: (Float, Float, Float) -> Unit,
-    initialColor: Color
+    initialColor: Color,
+    onColorChosen: (Float, Float, Float) -> Unit
 ) {
-    Dialog(
-        onDismissRequest = onDialogDismissed
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Card(
+        AlphaTile(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(600.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceAround
-            ) {
-                AlphaTile(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .clip(RoundedCornerShape(6.dp)),
-                    controller = colorController
+                .height(60.dp)
+                .clip(RoundedCornerShape(6.dp)),
+            controller = colorController
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        ColorPickerWheel(
+            colorController = colorController,
+            initialColor = initialColor,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = {
+                val rgbValues = Triple(
+                    colorController.selectedColor.value.red,
+                    colorController.selectedColor.value.green,
+                    colorController.selectedColor.value.blue
                 )
-                ColorPicker(
-                    colorController = colorController,
-                    initialColor = initialColor
+                val hsvValues = rgbToHsv(
+                    rgbValues.first,
+                    rgbValues.second,
+                    rgbValues.third
                 )
-                Button(
-                    onClick = {
-                        val rgbValues = Triple(
-                            colorController.selectedColor.value.red,
-                            colorController.selectedColor.value.green,
-                            colorController.selectedColor.value.blue
-                        )
-                        val hsvValues = rgbToHsv(
-                            rgbValues.first,
-                            rgbValues.second,
-                            rgbValues.third
-                        )
-                        onColorChosen(
-                            hsvValues.first,
-                            hsvValues.second,
-                            hsvValues.third
-                        )
-                    }
-                ) {
-                    Text("Set color")
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    Button(
-                        onClick = onDialogDismissed
-                    ) {
-                        Text("Close")
-                    }
-                    Button(
-                        onClick = {
-                            val rgbValues = Triple(
-                                colorController.selectedColor.value.red,
-                                colorController.selectedColor.value.green,
-                                colorController.selectedColor.value.blue
-                            )
-                            val hsvValues = rgbToHsv(
-                                rgbValues.first,
-                                rgbValues.second,
-                                rgbValues.third
-                            )
-                            onColorChosen(
-                                hsvValues.first,
-                                hsvValues.second,
-                                hsvValues.third
-                            )
-                            onDialogDismissed()
-                        }
-                    ) {
-                        Text("Set & close")
-                    }
-                }
-
+                onColorChosen(
+                    hsvValues.first,
+                    hsvValues.second,
+                    hsvValues.third
+                )
             }
-
+        ) {
+            Text("Set color")
         }
     }
 }
 
 @Composable
-fun ColorPicker(
+fun ColorPickerWheel(
     colorController: ColorPickerController,
     initialColor: Color
 ) {
     HsvColorPicker(
-        modifier = Modifier.size(300.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1F),
         controller = colorController,
         initialColor = initialColor
     )
@@ -243,9 +183,9 @@ fun rgbToHsv(r: Float, g: Float, b: Float): Triple<Float, Float, Float> {
     val hsv = FloatArray(3)
     android.graphics.Color.RGBToHSV(r255, g255, b255, hsv)
 
-    val h = hsv[0] / 360f  // Hue ranges from 0 to 360
-    val s = hsv[1]        // Saturation is already in 0 to 1 range
-    val v = hsv[2]        // Value is already in 0 to 1 range
+    val h = hsv[0] / 360f
+    val s = hsv[1]
+    val v = hsv[2]
 
     return Triple(h, s, v)
 }
