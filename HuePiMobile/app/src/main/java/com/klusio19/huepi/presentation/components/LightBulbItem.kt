@@ -25,10 +25,8 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.klusio19.huepi.R
-import com.klusio19.huepi.ui.theme.HuePiTheme
 
 
 @Composable
@@ -118,18 +116,3 @@ fun LightBulbItem(
         )
     }
 }
-
-    @Preview(showBackground = true, widthDp = 412)
-    @Composable
-    private fun LightBulbItemPreview() {
-        HuePiTheme(darkTheme = true) {
-            LightBulbItem(
-                color = Color.Yellow,
-                lightBulbName = "Lorem ipasdum asdfguh sdfgjkuadg dfgkjhasdfg, gajghlks asgdjghdf gfdh dfgj dfvjfhk",
-                brightnessLevel = 100.0F,
-                lightBulbOn = true,
-                onLightBulbClicked = {},
-                rid = "loremimpsum2137",
-            )
-        }
-    }

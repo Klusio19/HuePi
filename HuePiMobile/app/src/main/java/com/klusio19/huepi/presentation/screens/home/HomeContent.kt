@@ -12,12 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import com.klusio19.huepi.model.LightBulb
 import com.klusio19.huepi.presentation.components.LightBulbItem
-import com.klusio19.huepi.ui.theme.HuePiTheme
 
 
 @Composable
@@ -55,41 +53,3 @@ fun HomeContent(
         }
     }
 }
-
-
-@Preview(showSystemUi = true)
-@Composable
-private fun HomeContentPreview() {
-    HuePiTheme {
-        HomeContent(
-            lightBulbsList = lightBulbsList,
-            onLightBulbClicked = {},
-        )
-    }
-}
-
-val lightBulbsList = listOf(
-    LightBulb(
-    rid = "xd2137",
-    brightness = 100.0F,
-    color = "#ffe600",
-    isOn = true,
-    name = "Lampka dupa",
-    taskRunning = true
-), LightBulb(
-    rid = "asfjhl",
-    brightness = 45.0F,
-    color = "#221336",
-    isOn = true,
-    name = "Ciemnofioletowa lampka z bardzo długaśną nazwą która się rozjedzie na cały komponent i będzie bardzo śmiesznie",
-    taskRunning = false
-),
-    LightBulb(
-        rid = "45689utud",
-        brightness = 69.0F,
-        color = "#cf216c",
-        isOn = false,
-        name = "Wyłączona lampka",
-        taskRunning = true
-    )
-)

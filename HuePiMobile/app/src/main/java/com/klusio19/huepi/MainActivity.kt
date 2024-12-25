@@ -13,7 +13,6 @@ import com.klusio19.huepi.ui.theme.HuePiTheme
 
 class MainActivity : ComponentActivity() {
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()

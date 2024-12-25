@@ -28,7 +28,7 @@ fun SetupNavGraph(startDestination: Screen, navController: NavHostController, co
         loadingRoute(context, navController)
         setupAndConnectRoute(navController)
         homeRoute(navController)
-        lightRoute(context, navController)
+        lightRoute(context)
     }
 }
 
@@ -85,7 +85,7 @@ fun NavGraphBuilder.homeRoute(navController: NavHostController) {
     }
 }
 
-fun NavGraphBuilder.lightRoute(context: Application, navController: NavHostController) {
+fun NavGraphBuilder.lightRoute(context: Application) {
     composable<Screen.LightDetails> { backStackEntry ->
         val args = backStackEntry.toRoute<Screen.LightDetails>()
         val viewModelFactory = LightDetailsViewModelFactory(context, args.rid)

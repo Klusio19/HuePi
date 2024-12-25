@@ -110,25 +110,3 @@ fun LightDetailsScreen(
         }
     )
 }
-
-//@Preview(showSystemUi = true)
-//@Composable
-//private fun LightDetailsScreenPreview() {
-//    HuePiTheme(darkTheme = true) {
-//        LightDetailsScreen(
-//            lightBulb = LightBulb(
-//                rid = "2137xd",
-//                brightness = 21.37F,
-//                color = "#213F",
-//                isOn = true,
-//                name = "Taktyczna nazwa żarówki",
-//                taskRunning = false
-//            ),
-//            isFetchingData = false,
-//            onRefresh = {},
-//            onTurnOn = {},
-//            onTurnOff = {},
-//            onBrightnessSet = {}
-//        )
-//    }
-//}
