@@ -128,24 +128,6 @@ async def change_color(light_id: str,
 
 tasks = {}
 
-
-# @app.get("/temp-to-color/{light_id}")
-# async def temp_to_color(background_tasks: BackgroundTasks, light_id: str,
-#                         h_min: float, h_max: float, temp_min: float, temp_max: float,
-#                         api_key: str = Security(get_api_key)):
-#     _header = {"hue-application-key": hue_api_key}
-#     if light_id in tasks:
-#         tasks[light_id] = False
-#         del tasks[light_id]
-#         return {"message": f"Stopped displaying temp_to_light for light with id: {light_id}"}
-#     else:
-#         tasks[light_id] = True
-#         background_tasks.add_task(display_temperature_to_color,
-#                                   temp_min=temp_min, temp_max=temp_max,
-#                                   hsv_color_min=h_min, hsv_color_max=h_max, header=_header, light_id=light_id)
-#         return {"message": f"Displaying temp_to_light for light with id: {light_id}"}
-
-
 @app.get("/temp-to-color/{light_id}")
 async def temp_to_color(background_tasks: BackgroundTasks, light_id: str,
                         h_min: float, h_max: float, temp_min: float, temp_max: float,
@@ -201,6 +183,7 @@ async def get_lights(api_key: str = Security(get_api_key)):
         light["taskRunning"] = task_manager.is_task_running(light_id)
     
     return lights
+
 
 @app.get("/get-details/{light_id}")
 async def get_light_detail(light_id: str, api_key: str = Security(get_api_key)):
