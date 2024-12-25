@@ -9,6 +9,7 @@ import com.klusio19.huepi.model.LightBulb
 import com.klusio19.huepi.retrofit.RaspberryPiAPIService
 import com.klusio19.huepi.retrofit.RetrofitInstance
 import com.klusio19.huepi.utils.DataStoreManager
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -35,6 +36,7 @@ class LightDetailsViewModel(
 
     fun fetchLightBulb() {
         viewModelScope.launch {
+            delay(200)
             _isFetchingData.value = true
             try {
                 raspberryIpAddress = dataStoreManager.getRaspberryPiUrl()
@@ -70,13 +72,39 @@ class LightDetailsViewModel(
 
     fun changeBrightness(level: Float) {
         viewModelScope.launch {
-            val response = raspberryPiAPIService.setBrightness(rid, level)
+            val response = raspberryPiAPIService.setBrightness(
+                rid = rid,
+                level = level
+            )
         }
     }
 
     fun setColor(h: Float, s: Float, v: Float) {
         viewModelScope.launch {
-            val response = raspberryPiAPIService.setColor(rid, h, s, v)
+            val response = raspberryPiAPIService.setColor(
+                rid = rid,
+                h = h,
+                s = s,
+                v = v
+            )
+        }
+    }
+
+    fun startTempToColorTask(hueMin: Float, hueMax: Float, tempMin: Float, tempMax: Float) {
+        viewModelScope.launch{
+            val response = raspberryPiAPIService.startTempToColorTask(
+                rid = rid,
+                hueMin = hueMin,
+                hueMax = hueMax,
+                tempMin = tempMin,
+                tempMax = tempMax
+            )
+        }
+    }
+
+    fun stopTempToColorTask() {
+        viewModelScope.launch{
+            val response = raspberryPiAPIService.stopTempToColorTask(rid)
         }
     }
 }

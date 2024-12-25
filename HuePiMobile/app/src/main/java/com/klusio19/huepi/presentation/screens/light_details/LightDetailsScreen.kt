@@ -27,11 +27,13 @@ import com.klusio19.huepi.model.LightBulb
 fun LightDetailsScreen(
     lightBulb: LightBulb?,
     isFetchingData: Boolean,
-    onRefresh: () -> Unit,
+    onRefreshLightBulbData: () -> Unit,
     onTurnOn: () -> Unit,
     onTurnOff: () -> Unit,
     onBrightnessSet: (Float) -> Unit,
-    onColorChosen: (Float, Float, Float) -> Unit
+    onColorChosen: (Float, Float, Float) -> Unit,
+    onTempToColorTaskSet: (hueMin: Float, hueMax: Float, tempMin: Float, tempMax: Float) -> Unit,
+    onStopTask: () -> Unit
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
     Box(
@@ -40,7 +42,7 @@ fun LightDetailsScreen(
             PullToRefreshBox(
                 state = pullToRefreshState,
                 isRefreshing = isFetchingData,
-                onRefresh = onRefresh,
+                onRefresh = onRefreshLightBulbData,
                 modifier = Modifier.fillMaxSize()
             ) {
                 when {
@@ -76,7 +78,7 @@ fun LightDetailsScreen(
                                                 .padding(end = 8.dp)
                                                 .clickable(
                                                     enabled = true,
-                                                    onClick = onRefresh
+                                                    onClick = onRefreshLightBulbData
                                             )
                                         )
                                     }
@@ -91,9 +93,14 @@ fun LightDetailsScreen(
                                     onBrightnessSet = { level ->
                                         onBrightnessSet(level)
                                     },
-                                    onColorChosen = { h,s,v ->
+                                    onColorChosen = { h, s, v ->
                                         onColorChosen(h, s, v)
-                                    }
+                                    },
+                                    onTempToColorTaskSet = { hueMin, hueMax, tempMin, tempMax ->
+                                        onTempToColorTaskSet(hueMin, hueMax, tempMin, tempMax)
+                                    },
+                                    onStopTaskClicked = onStopTask,
+                                    refreshLightBulbData = onRefreshLightBulbData
                                 )
                             }
                         )

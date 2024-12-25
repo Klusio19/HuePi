@@ -43,4 +43,18 @@ interface RaspberryPiAPIService {
         @Query("s") s: Float,
         @Query("v") v: Float,
     ): Response<LightBulbStateChangeResponse?>
+
+    @GET("/temp-to-color/{rid}")
+    suspend fun startTempToColorTask(
+        @Path("rid") rid: String,
+        @Query("h_min") hueMin: Float,
+        @Query("h_max") hueMax: Float,
+        @Query("temp_min") tempMin: Float,
+        @Query("temp_max") tempMax: Float,
+    ): Response<LightBulbStateChangeResponse?>
+
+    @GET("/stop-temp-to-color/{rid}")
+    suspend fun stopTempToColorTask(
+        @Path("rid") rid: String
+    ): Response<LightBulbStateChangeResponse?>
 }

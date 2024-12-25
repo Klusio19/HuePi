@@ -46,6 +46,12 @@ fun LightBulbItem(
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
+            .clickable(
+                enabled = true,
+                onClickLabel = null,
+                role = null,
+                onClick = {onLightBulbClicked(rid)}
+            )
             .border(
                 3.dp,
                 MaterialTheme.colorScheme.inversePrimary,
@@ -54,13 +60,7 @@ fun LightBulbItem(
             .fillMaxWidth()
             .height(120.dp)
             .background(usedColor)
-            .padding(15.dp)
-            .clickable(
-                enabled = true,
-                onClickLabel = null,
-                role = null,
-                onClick = {onLightBulbClicked(rid)}
-            ),
+            .padding(15.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

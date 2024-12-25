@@ -93,14 +93,29 @@ fun NavGraphBuilder.lightRoute(context: Application, navController: NavHostContr
         LightDetailsScreen(
             lightBulb = viewModel.lightBulb.collectAsState().value,
             isFetchingData = viewModel.isFetchingData.collectAsState().value,
-            onRefresh = { viewModel.fetchLightBulb() },
+            onRefreshLightBulbData = { viewModel.fetchLightBulb() },
             onTurnOn = { viewModel.turnOnLightBulb() },
             onTurnOff = { viewModel.turnOffLightBulb() },
             onBrightnessSet = { level ->
                 viewModel.changeBrightness(level)
             },
             onColorChosen = { h, s, v ->
-                viewModel.setColor(h, s, v)
+                viewModel.setColor(
+                    h = h,
+                    s = s,
+                    v = v
+                )
+            },
+            onTempToColorTaskSet = { hueMin, hueMax, tempMin, tempMax ->
+                viewModel.startTempToColorTask(
+                    hueMin = hueMin,
+                    hueMax = hueMax,
+                    tempMin = tempMin,
+                    tempMax = tempMax
+                )
+            },
+            onStopTask = {
+                viewModel.stopTempToColorTask()
             }
         )
     }
